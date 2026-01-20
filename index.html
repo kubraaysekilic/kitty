@@ -7,70 +7,104 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
         
-        * {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        * {
             box-sizing: border-box;
         }
 
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #FFF5F8 0%, #F0E6FF 50%, #E6F7FF 100%);
+            flex-direction: column;
             font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
         }
 
         .game-container {
-            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(255,245,248,0.9) 0%, rgba(255,245,248,0) 100%);
         }
 
         h1 {
             color: #E8A0BF;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin: 0;
             text-shadow: 2px 2px 0px #fff, 0 0 20px rgba(232, 160, 191, 0.3);
             font-weight: 700;
         }
 
         .score-board {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 15px;
+            gap: 30px;
         }
 
         .score-item {
             color: #9B8AA5;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
+            background: rgba(255,255,255,0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #E8A0BF;
         }
 
         .score-item span {
-            color: #B4D4E7;
+            color: #E8A0BF;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            width: 100%;
+            position: relative;
         }
 
         #gameCanvas {
-            border: 4px solid #E8A0BF;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(232, 160, 191, 0.25), 
-                        0 0 0 8px rgba(255, 255, 255, 0.5);
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             color: #9B8AA5;
-            margin-top: 15px;
             font-size: 1rem;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #E8A0BF;
+            z-index: 10;
         }
 
         .instructions kbd {
             background: linear-gradient(135deg, #FFE5EC 0%, #E6F7FF 100%);
-            padding: 5px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             border: 2px solid #E8A0BF;
             color: #9B8AA5;
             font-family: inherit;
@@ -80,36 +114,40 @@
         #startMessage {
             position: absolute;
             color: #9B8AA5;
-            font-size: 1.5rem;
+            font-size: 2rem;
             text-shadow: 2px 2px 0px #fff;
             pointer-events: none;
             font-weight: 600;
+            z-index: 20;
         }
 
         #gameOverMessage {
             display: none;
             position: absolute;
             color: #E8A0BF;
-            font-size: 2rem;
+            font-size: 2.5rem;
             text-shadow: 2px 2px 0px #fff;
             pointer-events: none;
             font-weight: 700;
+            z-index: 20;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>🐱 Cozy Kitty Jump �</h1>
-        <div class="score-board">
-            <div class="score-item">Score: <span id="score">0</span></div>
-            <div class="score-item">High Score: <span id="highScore">0</span></div>
+        <div class="header">
+            <h1>🐱 Cozy Kitty Jump 🌸</h1>
+            <div class="score-board">
+                <div class="score-item">Score: <span id="score">0</span></div>
+                <div class="score-item">Best: <span id="highScore">0</span></div>
+            </div>
         </div>
-        <div style="position: relative; display: inline-block;">
-            <canvas id="gameCanvas" width="800" height="300"></canvas>
-            <div id="startMessage">Press SPACE or Click to Start!</div>
-            <div id="gameOverMessage">Game Over! Press SPACE to Restart</div>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+            <div id="startMessage">Press SPACE or Click to Start! 🌟</div>
+            <div id="gameOverMessage">Game Over! 😿 Press SPACE to Restart</div>
         </div>
-        <p class="instructions">Press <kbd>SPACE</kbd> or <kbd>Click</kbd> to Jump</p>
+        <p class="instructions">Press <kbd>SPACE</kbd> or <kbd>Click</kbd> to Jump 🐾</p>
     </div>
 
     <script>
@@ -120,6 +158,17 @@
         const startMessage = document.getElementById('startMessage');
         const gameOverMessage = document.getElementById('gameOverMessage');
 
+        // Fullscreen canvas setup
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if (!gameRunning) initialDraw();
+        });
+
         // Game state
         let gameRunning = false;
         let gameOver = false;
@@ -127,38 +176,45 @@
         let highScore = localStorage.getItem('jumpRunnerHighScore') || 0;
         highScoreElement.textContent = highScore;
 
-        // Ground
-        const groundY = 250;
+        // Dynamic ground position (80% of screen height)
+        function getGroundY() {
+            return canvas.height * 0.8;
+        }
 
-        // Cat player
+        // Cat player - bigger and cuter!
         const player = {
-            x: 80,
-            y: groundY - 50,
-            width: 50,
-            height: 50,
+            x: 100,
+            width: 70,
+            height: 70,
             velocityY: 0,
             jumping: false,
             color: '#FFB5C5',
-            innerColor: '#FFC8D6',
-            eyeColor: '#2D2D2D',
-            noseColor: '#E8A0BF',
-            blushColor: 'rgba(255, 182, 193, 0.5)'
+            innerColor: '#FFD4E0',
+            eyeColor: '#3D3D3D',
+            noseColor: '#FF9EBA',
+            blushColor: 'rgba(255, 150, 180, 0.6)',
+            get y() { return getGroundY() - this.height; }
         };
+        player._y = player.y;
 
         // Flowers decoration
         let flowers = [];
-        for (let i = 0; i < 8; i++) {
-            flowers.push({
-                x: Math.random() * canvas.width,
-                y: groundY + 10 + Math.random() * 30,
-                size: Math.random() * 8 + 6,
-                color: ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD'][Math.floor(Math.random() * 4)]
-            });
+        function initFlowers() {
+            flowers = [];
+            for (let i = 0; i < 15; i++) {
+                flowers.push({
+                    x: Math.random() * canvas.width,
+                    yOffset: 10 + Math.random() * 40,
+                    size: Math.random() * 10 + 8,
+                    color: ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD', '#98D4BB'][Math.floor(Math.random() * 5)]
+                });
+            }
         }
+        initFlowers();
 
-        // Gravity and jump
-        const gravity = 0.8;
-        const jumpForce = -15;
+        // Gravity and jump - adjusted for fullscreen
+        const gravity = 1.2;
+        const jumpForce = -22;
 
         // Obstacles
         let obstacles = [];
@@ -166,56 +222,80 @@
         let obstacleInterval = 100;
         let gameSpeed = 5;
 
-        // Clouds for decoration
-        let clouds = [
-            { x: 100, y: 50, width: 80, height: 40 },
-            { x: 300, y: 80, width: 60, height: 30 },
-            { x: 550, y: 40, width: 100, height: 50 },
-            { x: 750, y: 70, width: 70, height: 35 }
-        ];
+        // Clouds for decoration - more clouds for fullscreen
+        let clouds = [];
+        function initClouds() {
+            clouds = [];
+            for (let i = 0; i < 8; i++) {
+                clouds.push({
+                    x: Math.random() * canvas.width,
+                    y: 60 + Math.random() * 120,
+                    width: 80 + Math.random() * 60,
+                    height: 40 + Math.random() * 30
+                });
+            }
+        }
+        initClouds();
 
         // Ground decoration
         let groundLines = [];
-        for (let i = 0; i < 20; i++) {
-            groundLines.push({ x: i * 50, width: Math.random() * 30 + 10 });
+        function initGroundLines() {
+            groundLines = [];
+            for (let i = 0; i < Math.ceil(canvas.width / 40); i++) {
+                groundLines.push({ x: i * 40, width: Math.random() * 30 + 10 });
+            }
         }
+        initGroundLines();
 
         function drawBackground() {
+            const groundY = getGroundY();
+            
             // Soft pastel sky gradient
             const skyGradient = ctx.createLinearGradient(0, 0, 0, groundY);
             skyGradient.addColorStop(0, '#E6F7FF');
-            skyGradient.addColorStop(0.5, '#FFF5F8');
-            skyGradient.addColorStop(1, '#F0E6FF');
+            skyGradient.addColorStop(0.3, '#FFF5F8');
+            skyGradient.addColorStop(0.7, '#F5E6FF');
+            skyGradient.addColorStop(1, '#FFE8F0');
             ctx.fillStyle = skyGradient;
             ctx.fillRect(0, 0, canvas.width, groundY);
 
-            // Soft sun with glow
+            // Soft sun with glow - positioned relative to screen
+            const sunX = canvas.width - 120;
+            const sunY = 100;
             ctx.fillStyle = '#FFFACD';
             ctx.beginPath();
-            ctx.arc(700, 60, 45, 0, Math.PI * 2);
+            ctx.arc(sunX, sunY, 60, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#FFF8E7';
             ctx.beginPath();
-            ctx.arc(700, 60, 35, 0, Math.PI * 2);
+            ctx.arc(sunX, sunY, 45, 0, Math.PI * 2);
             ctx.fill();
             // Sun blush
-            ctx.fillStyle = 'rgba(255, 182, 193, 0.3)';
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.4)';
             ctx.beginPath();
-            ctx.arc(690, 65, 8, 0, Math.PI * 2);
+            ctx.arc(sunX - 15, sunY + 8, 10, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(710, 65, 8, 0, Math.PI * 2);
+            ctx.arc(sunX + 15, sunY + 8, 10, 0, Math.PI * 2);
             ctx.fill();
-            // Sun smile
+            // Sun eyes (closed happy eyes)
             ctx.strokeStyle = '#E8A0BF';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.arc(700, 62, 12, 0.1 * Math.PI, 0.9 * Math.PI);
+            ctx.arc(sunX - 12, sunY - 5, 8, 0.8 * Math.PI, 0.2 * Math.PI);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(sunX + 12, sunY - 5, 8, 0.8 * Math.PI, 0.2 * Math.PI);
+            ctx.stroke();
+            // Sun smile
+            ctx.beginPath();
+            ctx.arc(sunX, sunY + 5, 15, 0.1 * Math.PI, 0.9 * Math.PI);
             ctx.stroke();
 
             // Fluffy pastel clouds
             clouds.forEach(cloud => {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                 ctx.beginPath();
                 ctx.ellipse(cloud.x, cloud.y, cloud.width / 2, cloud.height / 2, 0, 0, Math.PI * 2);
                 ctx.fill();
@@ -226,7 +306,7 @@
                 ctx.ellipse(cloud.x + cloud.width / 3, cloud.y + 5, cloud.width / 3, cloud.height / 2.5, 0, 0, Math.PI * 2);
                 ctx.fill();
                 // Pink tint on clouds
-                ctx.fillStyle = 'rgba(255, 213, 224, 0.3)';
+                ctx.fillStyle = 'rgba(255, 213, 224, 0.4)';
                 ctx.beginPath();
                 ctx.ellipse(cloud.x, cloud.y + 5, cloud.width / 3, cloud.height / 3, 0, 0, Math.PI * 2);
                 ctx.fill();
@@ -235,26 +315,27 @@
             // Soft pastel ground
             const groundGradient = ctx.createLinearGradient(0, groundY, 0, canvas.height);
             groundGradient.addColorStop(0, '#C8E6C9');
-            groundGradient.addColorStop(0.5, '#A8D5A2');
-            groundGradient.addColorStop(1, '#8FBC8F');
+            groundGradient.addColorStop(0.3, '#B5DEB8');
+            groundGradient.addColorStop(1, '#98D4A0');
             ctx.fillStyle = groundGradient;
             ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
 
             // Cute grass tufts
-            ctx.fillStyle = '#98D4A0';
+            ctx.fillStyle = '#8BC98F';
             groundLines.forEach(line => {
                 ctx.beginPath();
                 ctx.moveTo(line.x, groundY);
-                ctx.quadraticCurveTo(line.x + 3, groundY - 8, line.x + 6, groundY);
+                ctx.quadraticCurveTo(line.x + 4, groundY - 12, line.x + 8, groundY);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.moveTo(line.x + 8, groundY);
-                ctx.quadraticCurveTo(line.x + 11, groundY - 6, line.x + 14, groundY);
+                ctx.moveTo(line.x + 12, groundY);
+                ctx.quadraticCurveTo(line.x + 16, groundY - 10, line.x + 20, groundY);
                 ctx.fill();
             });
 
             // Draw flowers
             flowers.forEach(flower => {
+                const flowerY = groundY + flower.yOffset;
                 // Flower petals
                 ctx.fillStyle = flower.color;
                 for (let i = 0; i < 5; i++) {
@@ -262,9 +343,9 @@
                     const angle = (i * 72) * Math.PI / 180;
                     ctx.ellipse(
                         flower.x + Math.cos(angle) * flower.size * 0.4,
-                        flower.y + Math.sin(angle) * flower.size * 0.4,
-                        flower.size * 0.4,
-                        flower.size * 0.4,
+                        flowerY + Math.sin(angle) * flower.size * 0.4,
+                        flower.size * 0.5,
+                        flower.size * 0.5,
                         0, 0, Math.PI * 2
                     );
                     ctx.fill();
@@ -272,207 +353,231 @@
                 // Flower center
                 ctx.fillStyle = '#FFFACD';
                 ctx.beginPath();
-                ctx.arc(flower.x, flower.y, flower.size * 0.3, 0, Math.PI * 2);
+                ctx.arc(flower.x, flowerY, flower.size * 0.35, 0, Math.PI * 2);
                 ctx.fill();
             });
         }
 
         function drawPlayer() {
+            const groundY = getGroundY();
             const px = player.x;
-            const py = player.y;
+            const py = player._y;
             const pw = player.width;
             const ph = player.height;
 
             // Soft shadow
-            ctx.fillStyle = 'rgba(200, 180, 200, 0.3)';
+            ctx.fillStyle = 'rgba(200, 180, 200, 0.35)';
             ctx.beginPath();
-            ctx.ellipse(px + pw / 2, groundY + 5, pw / 2 + 5, 8, 0, 0, Math.PI * 2);
+            ctx.ellipse(px + pw / 2, groundY + 8, pw / 2 + 8, 12, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Cat ears
+            // Cute curly tail
+            ctx.strokeStyle = player.color;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(px + pw - 5, py + ph - 15);
+            ctx.bezierCurveTo(px + pw + 25, py + ph - 20, px + pw + 30, py + ph - 50, px + pw + 15, py + ph - 60);
+            ctx.stroke();
+            // Tail tip
+            ctx.fillStyle = '#FFD4E0';
+            ctx.beginPath();
+            ctx.arc(px + pw + 15, py + ph - 62, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cat ears - bigger and rounder
             ctx.fillStyle = player.color;
             // Left ear
             ctx.beginPath();
-            ctx.moveTo(px + 5, py + 5);
-            ctx.lineTo(px + 2, py - 15);
-            ctx.lineTo(px + 18, py + 5);
-            ctx.closePath();
+            ctx.moveTo(px + 8, py + 10);
+            ctx.quadraticCurveTo(px - 5, py - 25, px + 20, py + 5);
             ctx.fill();
             // Right ear
             ctx.beginPath();
-            ctx.moveTo(px + pw - 5, py + 5);
-            ctx.lineTo(px + pw - 2, py - 15);
-            ctx.lineTo(px + pw - 18, py + 5);
-            ctx.closePath();
+            ctx.moveTo(px + pw - 8, py + 10);
+            ctx.quadraticCurveTo(px + pw + 5, py - 25, px + pw - 20, py + 5);
             ctx.fill();
 
             // Inner ears (pink)
             ctx.fillStyle = player.noseColor;
             ctx.beginPath();
-            ctx.moveTo(px + 7, py + 3);
-            ctx.lineTo(px + 5, py - 8);
-            ctx.lineTo(px + 14, py + 3);
-            ctx.closePath();
+            ctx.moveTo(px + 10, py + 8);
+            ctx.quadraticCurveTo(px + 2, py - 12, px + 18, py + 6);
             ctx.fill();
             ctx.beginPath();
-            ctx.moveTo(px + pw - 7, py + 3);
-            ctx.lineTo(px + pw - 5, py - 8);
-            ctx.lineTo(px + pw - 14, py + 3);
-            ctx.closePath();
+            ctx.moveTo(px + pw - 10, py + 8);
+            ctx.quadraticCurveTo(px + pw - 2, py - 12, px + pw - 18, py + 6);
             ctx.fill();
 
-            // Cat body (rounded rectangle)
+            // Cat body (more rounded, cuter shape)
             ctx.fillStyle = player.color;
             ctx.beginPath();
-            ctx.roundRect(px, py, pw, ph, 12);
+            ctx.roundRect(px, py, pw, ph, 20);
             ctx.fill();
 
-            // Body highlight
+            // Body highlight (belly)
             ctx.fillStyle = player.innerColor;
             ctx.beginPath();
-            ctx.roundRect(px + 8, py + 8, pw - 16, ph - 20, 8);
+            ctx.ellipse(px + pw/2, py + ph/2 + 5, pw/2 - 12, ph/2 - 10, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Eyes (cute oval eyes)
+            // Eyes - BIGGER and cuter kawaii style
+            const eyeY = py + 25;
+            const leftEyeX = px + 20;
+            const rightEyeX = px + 50;
+            
+            // Eye whites
             ctx.fillStyle = '#fff';
             ctx.beginPath();
-            ctx.ellipse(px + 15, py + 20, 9, 11, 0, 0, Math.PI * 2);
+            ctx.ellipse(leftEyeX, eyeY, 14, 16, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(px + 35, py + 20, 9, 11, 0, 0, Math.PI * 2);
+            ctx.ellipse(rightEyeX, eyeY, 14, 16, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Pupils
+            // Pupils - big and shiny
             ctx.fillStyle = player.eyeColor;
             ctx.beginPath();
-            ctx.ellipse(px + 17, py + 21, 5, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(leftEyeX + 2, eyeY + 2, 9, 11, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(px + 37, py + 21, 5, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(rightEyeX + 2, eyeY + 2, 9, 11, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Eye sparkles
+            // Eye sparkles - multiple for extra cute
             ctx.fillStyle = '#fff';
+            // Big sparkles
             ctx.beginPath();
-            ctx.arc(px + 15, py + 18, 2, 0, Math.PI * 2);
+            ctx.arc(leftEyeX - 2, eyeY - 4, 4, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(px + 35, py + 18, 2, 0, Math.PI * 2);
+            ctx.arc(rightEyeX - 2, eyeY - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+            // Small sparkles
+            ctx.beginPath();
+            ctx.arc(leftEyeX + 4, eyeY + 4, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(rightEyeX + 4, eyeY + 4, 2, 0, Math.PI * 2);
             ctx.fill();
 
-            // Blush circles
+            // Rosy blush circles - bigger and more visible
             ctx.fillStyle = player.blushColor;
             ctx.beginPath();
-            ctx.ellipse(px + 6, py + 28, 6, 4, 0, 0, Math.PI * 2);
+            ctx.ellipse(px + 5, eyeY + 15, 10, 6, -0.2, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.ellipse(px + 44, py + 28, 6, 4, 0, 0, Math.PI * 2);
+            ctx.ellipse(px + pw - 5, eyeY + 15, 10, 6, 0.2, 0, Math.PI * 2);
             ctx.fill();
 
-            // Cute nose
+            // Cute little nose - heart shaped
             ctx.fillStyle = player.noseColor;
             ctx.beginPath();
-            ctx.moveTo(px + 25, py + 28);
-            ctx.lineTo(px + 22, py + 33);
-            ctx.lineTo(px + 28, py + 33);
-            ctx.closePath();
+            ctx.moveTo(px + pw/2, eyeY + 18);
+            ctx.bezierCurveTo(px + pw/2 - 6, eyeY + 14, px + pw/2 - 6, eyeY + 22, px + pw/2, eyeY + 26);
+            ctx.bezierCurveTo(px + pw/2 + 6, eyeY + 22, px + pw/2 + 6, eyeY + 14, px + pw/2, eyeY + 18);
             ctx.fill();
 
-            // Mouth (w shape for cat)
-            ctx.strokeStyle = '#9B8AA5';
-            ctx.lineWidth = 2;
+            // Mouth (cute cat :3 mouth)
+            ctx.strokeStyle = '#C9A0B5';
+            ctx.lineWidth = 2.5;
             ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(px + 18, py + 37);
-            ctx.quadraticCurveTo(px + 22, py + 40, px + 25, py + 36);
-            ctx.quadraticCurveTo(px + 28, py + 40, px + 32, py + 37);
+            ctx.moveTo(px + pw/2 - 12, eyeY + 32);
+            ctx.quadraticCurveTo(px + pw/2 - 6, eyeY + 38, px + pw/2, eyeY + 32);
+            ctx.quadraticCurveTo(px + pw/2 + 6, eyeY + 38, px + pw/2 + 12, eyeY + 32);
             ctx.stroke();
 
-            // Whiskers
-            ctx.strokeStyle = '#C9B1FF';
-            ctx.lineWidth = 1.5;
+            // Whiskers - longer and cuter
+            ctx.strokeStyle = '#D4B8C9';
+            ctx.lineWidth = 2;
             // Left whiskers
             ctx.beginPath();
-            ctx.moveTo(px + 5, py + 30);
-            ctx.lineTo(px - 8, py + 28);
+            ctx.moveTo(px + 8, eyeY + 20);
+            ctx.lineTo(px - 18, eyeY + 15);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(px + 5, py + 34);
-            ctx.lineTo(px - 8, py + 36);
+            ctx.moveTo(px + 8, eyeY + 26);
+            ctx.lineTo(px - 18, eyeY + 28);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(px + 8, eyeY + 32);
+            ctx.lineTo(px - 15, eyeY + 40);
             ctx.stroke();
             // Right whiskers
             ctx.beginPath();
-            ctx.moveTo(px + 45, py + 30);
-            ctx.lineTo(px + 58, py + 28);
+            ctx.moveTo(px + pw - 8, eyeY + 20);
+            ctx.lineTo(px + pw + 18, eyeY + 15);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(px + 45, py + 34);
-            ctx.lineTo(px + 58, py + 36);
+            ctx.moveTo(px + pw - 8, eyeY + 26);
+            ctx.lineTo(px + pw + 18, eyeY + 28);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(px + pw - 8, eyeY + 32);
+            ctx.lineTo(px + pw + 15, eyeY + 40);
             ctx.stroke();
 
-            // Tail (when not jumping, show a cute curved tail)
-            if (!player.jumping) {
-                ctx.strokeStyle = player.color;
-                ctx.lineWidth = 6;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(px + pw - 3, py + ph - 10);
-                ctx.quadraticCurveTo(px + pw + 15, py + ph - 25, px + pw + 10, py + ph - 40);
-                ctx.stroke();
-            }
+            // Little paws at the bottom
+            ctx.fillStyle = player.innerColor;
+            ctx.beginPath();
+            ctx.ellipse(px + 15, py + ph - 5, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(px + pw - 15, py + ph - 5, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Paw pads
+            ctx.fillStyle = player.noseColor;
+            ctx.beginPath();
+            ctx.arc(px + 15, py + ph - 3, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + pw - 15, py + ph - 3, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function drawObstacle(obstacle) {
+            const groundY = getGroundY();
+            
             // Soft shadow
-            ctx.fillStyle = 'rgba(200, 180, 200, 0.25)';
+            ctx.fillStyle = 'rgba(200, 180, 200, 0.3)';
             ctx.beginPath();
-            ctx.ellipse(obstacle.x + obstacle.width / 2, groundY + 5, obstacle.width / 2 + 3, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(obstacle.x + obstacle.width / 2, groundY + 8, obstacle.width / 2 + 5, 10, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Cute mushroom obstacle
-            const capHeight = obstacle.height * 0.6;
-            const stemHeight = obstacle.height * 0.5;
-            const capWidth = obstacle.width * 1.4;
+            // Cute mushroom obstacle - bigger
+            const capHeight = obstacle.height * 0.55;
+            const stemHeight = obstacle.height * 0.55;
+            const capWidth = obstacle.width * 1.5;
             
             // Mushroom stem
-            ctx.fillStyle = '#FFF5EE';
+            ctx.fillStyle = '#FFF8F0';
             ctx.beginPath();
             ctx.roundRect(
-                obstacle.x + obstacle.width * 0.15,
-                obstacle.y + capHeight - 5,
-                obstacle.width * 0.7,
+                obstacle.x + obstacle.width * 0.1,
+                obstacle.y + capHeight - 8,
+                obstacle.width * 0.8,
                 stemHeight,
-                [0, 0, 8, 8]
+                [0, 0, 12, 12]
             );
             ctx.fill();
 
             // Stem highlight
-            ctx.fillStyle = '#FFFAF5';
+            ctx.fillStyle = '#FFFDF8';
             ctx.beginPath();
             ctx.roundRect(
                 obstacle.x + obstacle.width * 0.25,
                 obstacle.y + capHeight,
-                obstacle.width * 0.2,
-                stemHeight - 10,
-                4
+                obstacle.width * 0.25,
+                stemHeight - 15,
+                6
             );
             ctx.fill();
 
             // Mushroom cap
-            const capColors = ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD'];
-            const capColor = capColors[Math.floor(obstacle.x) % 4];
+            const capColors = ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD', '#B8E6C1'];
+            const capColor = capColors[Math.floor(obstacle.x) % 5];
             ctx.fillStyle = capColor;
-            ctx.beginPath();
-            ctx.ellipse(
-                obstacle.x + obstacle.width / 2,
-                obstacle.y + capHeight / 2,
-                capWidth / 2,
-                capHeight / 2,
-                0, Math.PI, 0
-            );
-            ctx.fill();
-
-            // Cap top curve
             ctx.beginPath();
             ctx.ellipse(
                 obstacle.x + obstacle.width / 2,
@@ -484,21 +589,25 @@
             ctx.fill();
 
             // Cute spots on cap
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width * 0.3, obstacle.y + capHeight * 0.35, 5, 0, Math.PI * 2);
+            ctx.arc(obstacle.x + obstacle.width * 0.25, obstacle.y + capHeight * 0.35, 7, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width * 0.7, obstacle.y + capHeight * 0.4, 4, 0, Math.PI * 2);
+            ctx.arc(obstacle.x + obstacle.width * 0.75, obstacle.y + capHeight * 0.4, 6, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width * 0.5, obstacle.y + capHeight * 0.2, 3, 0, Math.PI * 2);
+            ctx.arc(obstacle.x + obstacle.width * 0.5, obstacle.y + capHeight * 0.2, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(obstacle.x + obstacle.width * 0.6, obstacle.y + capHeight * 0.55, 4, 0, Math.PI * 2);
             ctx.fill();
         }
 
         function spawnObstacle() {
-            const height = Math.random() * 30 + 40;
-            const width = Math.random() * 15 + 25;
+            const groundY = getGroundY();
+            const height = Math.random() * 40 + 60;
+            const width = Math.random() * 20 + 35;
             obstacles.push({
                 x: canvas.width,
                 y: groundY - height,
@@ -508,13 +617,15 @@
         }
 
         function updatePlayer() {
+            const groundY = getGroundY();
+            
             // Apply gravity
             player.velocityY += gravity;
-            player.y += player.velocityY;
+            player._y += player.velocityY;
 
             // Ground collision
-            if (player.y >= groundY - player.height) {
-                player.y = groundY - player.height;
+            if (player._y >= groundY - player.height) {
+                player._y = groundY - player.height;
                 player.velocityY = 0;
                 player.jumping = false;
             }
@@ -564,18 +675,20 @@
                 flower.x -= gameSpeed * 0.5;
                 if (flower.x + flower.size < 0) {
                     flower.x = canvas.width + flower.size;
-                    flower.y = groundY + 10 + Math.random() * 30;
-                    flower.color = ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD'][Math.floor(Math.random() * 4)];
+                    flower.yOffset = 10 + Math.random() * 40;
+                    flower.color = ['#FFB5C5', '#B4D4E7', '#C9B1FF', '#FFFACD', '#98D4BB'][Math.floor(Math.random() * 5)];
                 }
             });
         }
 
         function checkCollision() {
             for (let obstacle of obstacles) {
-                if (player.x < obstacle.x + obstacle.width &&
-                    player.x + player.width > obstacle.x &&
-                    player.y < obstacle.y + obstacle.height &&
-                    player.y + player.height > obstacle.y) {
+                // Smaller hitbox for more forgiving gameplay
+                const hitboxPadding = 10;
+                if (player.x + hitboxPadding < obstacle.x + obstacle.width - 5 &&
+                    player.x + player.width - hitboxPadding > obstacle.x + 5 &&
+                    player._y + hitboxPadding < obstacle.y + obstacle.height &&
+                    player._y + player.height > obstacle.y + 10) {
                     return true;
                 }
             }
@@ -606,7 +719,7 @@
             gameSpeed = 5;
             obstacles = [];
             obstacleTimer = 0;
-            player.y = groundY - player.height;
+            player._y = getGroundY() - player.height;
             player.velocityY = 0;
             player.jumping = false;
             scoreElement.textContent = '0';
@@ -667,6 +780,7 @@
 
         // Initial draw
         function initialDraw() {
+            player._y = getGroundY() - player.height;
             drawBackground();
             drawPlayer();
             startMessage.style.display = 'block';
